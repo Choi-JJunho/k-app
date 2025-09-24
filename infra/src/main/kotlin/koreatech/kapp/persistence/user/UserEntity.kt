@@ -1,41 +1,26 @@
-package koreatech.kapp.persistence.entity
+package koreatech.kapp.persistence.user
 
-import jakarta.persistence.*
-import koreatech.kapp.domain.shared.Email
-import koreatech.kapp.domain.user.model.*
+import koreatech.kapp.domain.common.Email
+import koreatech.kapp.domain.user.model.HashedPassword
+import koreatech.kapp.domain.user.model.User
+import koreatech.kapp.domain.user.model.UserId
 import java.time.LocalDateTime
 
 /**
- * 사용자 JPA 엔티티
- * 도메인 모델과 분리된 인프라 레벨 엔티티
+ * 사용자 JooQ 레코드
+ * 도메인 모델과 분리된 인프라 레벨 레코드
  */
-@Entity
-@Table(name = "users")
-data class UserEntity(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+data class UserRecord(
     val id: Long? = null,
-
-    @Column(unique = true, nullable = false)
     val email: String,
-
-    @Column(nullable = false)
     val password: String,
-
-    @Column(nullable = false)
     val name: String,
-
-    @Column(name = "student_employee_id", nullable = false)
     val studentEmployeeId: String,
-
-    @Column(name = "created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
-
-    @Column(name = "updated_at", nullable = false)
     val updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
     /**
-     * JPA 엔티티를 도메인 모델로 변환
+     * JooQ 레코드를 도메인 모델로 변환
      */
     fun toDomain(): User {
         return User(
@@ -51,10 +36,10 @@ data class UserEntity(
 
     companion object {
         /**
-         * 도메인 모델을 JPA 엔티티로 변환
+         * 도메인 모델을 JooQ 레코드로 변환
          */
-        fun fromDomain(user: User): UserEntity {
-            return UserEntity(
+        fun fromDomain(user: User): UserRecord {
+            return UserRecord(
                 id = user.id?.value,
                 email = user.email.value,
                 password = user.password.value,

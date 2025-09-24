@@ -1,4 +1,4 @@
-package koreatech.kapp.dto
+package koreatech.kapp.user.controller.dto
 
 import koreatech.kapp.domain.user.model.User
 import java.time.LocalDateTime
@@ -19,7 +19,6 @@ data class LoginResponse(
 data class RegisterRequest(
     val email: String,
     val password: String,
-    val confirmPassword: String,
     val name: String,
     val studentEmployeeId: String
 )

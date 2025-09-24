@@ -1,4 +1,4 @@
-package koreatech.kapp.domain.shared
+package koreatech.kapp.domain.common
 
 /**
  * 도메인 레벨 예외 클래스

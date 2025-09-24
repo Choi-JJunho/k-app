@@ -1,4 +1,4 @@
-package koreatech.kapp.service
+package koreatech.kapp.user.jwt
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
  */
 @Service
 class JwtService(
-    private val jwtProperties: JwtProperties,
+    jwtProperties: JwtProperties,
 ) {
     private val algorithm: Algorithm = Algorithm.HMAC512(jwtProperties.secretKey)
     private val accessTokenExpirationMillis: Long =

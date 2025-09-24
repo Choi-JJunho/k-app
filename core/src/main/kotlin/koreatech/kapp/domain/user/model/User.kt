@@ -1,6 +1,6 @@
 package koreatech.kapp.domain.user.model
 
-import koreatech.kapp.domain.shared.Email
+import koreatech.kapp.domain.common.Email
 import java.time.LocalDateTime
 
 /**

@@ -16,14 +16,6 @@ class ApplicationConfig(
     private val authenticatedUserArgumentResolver: AuthenticatedUserArgumentResolver
 ) : WebMvcConfigurer {
 
-    @Bean
-    fun userDomainService(
-        userRepository: UserRepository,
-        passwordEncoder: PasswordEncoder
-    ): UserDomainService {
-        return UserDomainService(userRepository, passwordEncoder)
-    }
-
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
         resolvers.add(authenticatedUserArgumentResolver)
     }

@@ -1,20 +1,23 @@
-package koreatech.kapp.application
+package koreatech.kapp.user.service
 
-import koreatech.kapp.domain.shared.Email
-import koreatech.kapp.domain.user.model.*
+import koreatech.kapp.domain.common.Email
+import koreatech.kapp.domain.user.model.UserId
 import koreatech.kapp.domain.user.service.UserDomainService
-import koreatech.kapp.dto.*
-import koreatech.kapp.service.JwtService
+import koreatech.kapp.user.controller.dto.LoginRequest
+import koreatech.kapp.user.controller.dto.LoginResponse
+import koreatech.kapp.user.controller.dto.RegisterRequest
+import koreatech.kapp.user.controller.dto.RegisterResponse
+import koreatech.kapp.user.controller.dto.UserResponse
+import koreatech.kapp.user.controller.dto.toUserResponse
+import koreatech.kapp.user.jwt.JwtService
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 /**
  * 간소화된 사용자 애플리케이션 서비스
  * 도메인 서비스를 조합하여 사용 사례 구현
  */
 @Service
-@Transactional
-class UserApplicationService(
+class AuthService(
     private val userDomainService: UserDomainService,
     private val jwtService: JwtService
 ) {
@@ -22,7 +25,7 @@ class UserApplicationService(
     fun register(request: RegisterRequest): RegisterResponse {
         val email = Email(request.email)
         val user = userDomainService.createUser(
-            email = email, 
+            email = email,
             rawPassword = request.password,
             name = request.name,
             studentEmployeeId = request.studentEmployeeId
@@ -46,15 +49,8 @@ class UserApplicationService(
         )
     }
 
-    @Transactional(readOnly = true)
     fun getCurrentUser(userId: UserId): UserResponse {
         val user = userDomainService.getUserById(userId)
         return user.toUserResponse()
     }
-
-    fun updateName(userId: UserId, newName: String): UserResponse {
-        val updatedUser = userDomainService.updateUserName(userId, newName)
-        return updatedUser.toUserResponse()
-    }
 }
-

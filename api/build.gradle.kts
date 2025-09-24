@@ -6,17 +6,6 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-// Infra 모듈의 리소스를 API 모듈 클래스패스에 포함
-tasks.register<Copy>("copyInfraResources") {
-    from(project(":infra").file("src/main/resources"))
-    into(layout.buildDirectory.dir("resources/main"))
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
-
-tasks.processResources {
-    dependsOn("copyInfraResources")
-}
-
 dependencies {
     // Core와 Infra 모듈 의존
     implementation(project(":core"))
@@ -26,13 +15,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-mail")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa") // Transactional 지원
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // 데이터베이스
     runtimeOnly("org.postgresql:postgresql")
-    runtimeOnly("com.h2database:h2") // 로컬 개발용
+    runtimeOnly("com.h2database:h2")
+
+    // Swagger
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
 
     // JWT
     implementation("com.auth0:java-jwt:4.5.0")
@@ -41,4 +32,16 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.register<Copy>("copySecret") {
+    from("${rootDir}/kapp-config/kapp-backend")
+    include("application*.yml")
+    include("*.p8")
+    exclude("application-local.yml")
+    into("./src/main/resources")
+}
+
+tasks.named("processResources") {
+    dependsOn("copySecret")
 }

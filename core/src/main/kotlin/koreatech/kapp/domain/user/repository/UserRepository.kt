@@ -1,6 +1,6 @@
 package koreatech.kapp.domain.user.repository
 
-import koreatech.kapp.domain.shared.Email
+import koreatech.kapp.domain.common.Email
 import koreatech.kapp.domain.user.model.User
 import koreatech.kapp.domain.user.model.UserId
 

@@ -1,9 +1,9 @@
 package koreatech.kapp.domain.user.service
 
-import koreatech.kapp.domain.shared.DuplicateEmail
-import koreatech.kapp.domain.shared.Email
-import koreatech.kapp.domain.shared.InvalidCredentials
-import koreatech.kapp.domain.shared.UserNotFound
+import koreatech.kapp.domain.common.DuplicateEmail
+import koreatech.kapp.domain.common.Email
+import koreatech.kapp.domain.common.InvalidCredentials
+import koreatech.kapp.domain.common.UserNotFound
 import koreatech.kapp.domain.user.model.*
 import koreatech.kapp.domain.user.repository.UserRepository
 

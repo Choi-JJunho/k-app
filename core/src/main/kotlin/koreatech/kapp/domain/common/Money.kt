@@ -1,4 +1,4 @@
-package koreatech.kapp.domain.shared
+package koreatech.kapp.domain.common
 
 import java.math.BigDecimal
 

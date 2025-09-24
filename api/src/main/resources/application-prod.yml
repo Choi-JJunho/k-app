@@ -1,5 +1,0 @@
-logging:
-  level:
-    koreatech.kapp: INFO
-    org.springframework.web: WARN
-    org.hibernate.SQL: WARN

@@ -1,6 +1,6 @@
 package koreatech.kapp.domain.meal.model
 
-import koreatech.kapp.domain.shared.Money
+import koreatech.kapp.domain.common.Money
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -79,4 +79,3 @@ enum class DiningTime(val displayName: String) {
         }
     }
 }
-

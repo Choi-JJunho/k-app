@@ -1,4 +1,4 @@
-package koreatech.kapp.domain.shared
+package koreatech.kapp.domain.common
 
 data class Email(val value: String) {
     init {

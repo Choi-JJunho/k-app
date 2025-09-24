@@ -5,10 +5,6 @@ spring:
   application:
     name: k-app
 
-  config:
-    import:
-      - classpath:database.yml
-
 server:
   port: 8080
   servlet:
