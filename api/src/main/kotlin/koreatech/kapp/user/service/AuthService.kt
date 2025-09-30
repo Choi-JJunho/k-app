@@ -1,14 +1,10 @@
 package koreatech.kapp.user.service
 
 import koreatech.kapp.domain.common.Email
+import koreatech.kapp.domain.user.model.User
 import koreatech.kapp.domain.user.model.UserId
 import koreatech.kapp.domain.user.service.UserDomainService
-import koreatech.kapp.user.controller.dto.LoginRequest
-import koreatech.kapp.user.controller.dto.LoginResponse
-import koreatech.kapp.user.controller.dto.RegisterRequest
-import koreatech.kapp.user.controller.dto.RegisterResponse
-import koreatech.kapp.user.controller.dto.UserResponse
-import koreatech.kapp.user.controller.dto.toUserResponse
+import koreatech.kapp.user.controller.dto.*
 import koreatech.kapp.user.jwt.JwtService
 import org.springframework.stereotype.Service
 
@@ -49,8 +45,8 @@ class AuthService(
         )
     }
 
-    fun getCurrentUser(userId: UserId): UserResponse {
+    fun getCurrentUser(userId: UserId): User {
         val user = userDomainService.getUserById(userId)
-        return user.toUserResponse()
+        return user
     }
 }

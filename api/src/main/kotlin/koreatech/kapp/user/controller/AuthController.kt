@@ -8,6 +8,7 @@ import koreatech.kapp.user.controller.dto.LoginResponse
 import koreatech.kapp.user.controller.dto.RegisterRequest
 import koreatech.kapp.user.controller.dto.RegisterResponse
 import koreatech.kapp.user.controller.dto.UserResponse
+import koreatech.kapp.user.controller.dto.toUserResponse
 import koreatech.kapp.user.service.AuthService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -42,7 +43,7 @@ class AuthController(
     fun getCurrentUser(
         @AuthenticatedUser userId: UserId
     ): ResponseEntity<UserResponse> {
-        val response = userApplicationService.getCurrentUser(userId)
-        return ResponseEntity.ok(response)
+        val user = userApplicationService.getCurrentUser(userId)
+        return ResponseEntity.ok(user.toUserResponse())
     }
 }

@@ -28,6 +28,9 @@ dependencies {
     // JWT
     implementation("com.auth0:java-jwt:4.5.0")
 
+    // Logging
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+
     // 테스트
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -38,7 +41,6 @@ tasks.register<Copy>("copySecret") {
     from("${rootDir}/kapp-config/kapp-backend")
     include("application*.yml")
     include("*.p8")
-    exclude("application-local.yml")
     into("./src/main/resources")
 }
 

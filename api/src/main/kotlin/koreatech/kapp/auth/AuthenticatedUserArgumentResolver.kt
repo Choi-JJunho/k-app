@@ -1,7 +1,9 @@
 package koreatech.kapp.auth
 
+import koreatech.kapp.domain.user.model.User
 import koreatech.kapp.domain.user.model.UserId
 import koreatech.kapp.user.jwt.JwtService
+import koreatech.kapp.user.service.AuthService
 import org.springframework.core.MethodParameter
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
@@ -17,12 +19,13 @@ private const val BEARER_PREFIX = "Bearer "
  */
 @Component
 class AuthenticatedUserArgumentResolver(
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val authService: AuthService
 ) : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.hasParameterAnnotation(AuthenticatedUser::class.java) &&
-                parameter.parameterType == UserId::class.java
+                parameter.parameterType == User::class.java
     }
 
     override fun resolveArgument(
@@ -30,7 +33,7 @@ class AuthenticatedUserArgumentResolver(
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): UserId {
+    ): User {
         val authorizationHeader = webRequest.getHeader("Authorization")
             ?: throw IllegalArgumentException("Authorization header is required")
 
@@ -40,7 +43,13 @@ class AuthenticatedUserArgumentResolver(
 
         require(jwtService.isValidToken(token)) { "Invalid JWT token" }
 
-        val userId = jwtService.extractUserId(token)
-        return UserId(userId)
+        val extractedId = jwtService.extractUserId(token)
+        val userId = UserId(extractedId)
+        val user = try {
+            authService.getCurrentUser(userId)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("부정확한 토큰입니다.")
+        }
+        return user
     }
 }
