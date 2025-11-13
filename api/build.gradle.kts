@@ -15,6 +15,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
@@ -27,6 +29,9 @@ dependencies {
 
     // JWT
     implementation("com.auth0:java-jwt:4.5.0")
+
+    // Rate Limiting
+    implementation("com.bucket4j:bucket4j-core:8.10.1")
 
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
