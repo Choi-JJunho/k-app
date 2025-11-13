@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.5.5" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
     kotlin("plugin.jpa") version "1.9.25" apply false
+    jacoco
 }
 
 group = "koreatech"
@@ -18,6 +19,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "jacoco")
 
     java {
         toolchain {
@@ -33,6 +35,36 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+        finalizedBy(tasks.named("jacocoTestReport"))
+    }
+
+    tasks.named<JacocoReport>("jacocoTestReport") {
+        dependsOn(tasks.named("test"))
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+            csv.required.set(false)
+        }
+    }
+
+    tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+        dependsOn(tasks.named("jacocoTestReport"))
+        violationRules {
+            rule {
+                limit {
+                    minimum = "0.60".toBigDecimal()
+                }
+            }
+            rule {
+                enabled = true
+                element = "CLASS"
+                limit {
+                    counter = "LINE"
+                    value = "COVEREDRATIO"
+                    minimum = "0.50".toBigDecimal()
+                }
+            }
+        }
     }
 }
 

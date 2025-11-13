@@ -49,26 +49,31 @@ jobs:
         DATABASE_USERNAME: kapp
         DATABASE_PASSWORD: kapp123
 
-    - name: Run tests
-      run: ./gradlew test --no-daemon --stacktrace
+    - name: Run tests with coverage
+      run: ./gradlew test jacocoTestReport --no-daemon --stacktrace
       env:
         DATABASE_URL: jdbc:postgresql://localhost:5432/kapp_test
         DATABASE_USERNAME: kapp
         DATABASE_PASSWORD: kapp123
+
+    - name: Verify test coverage
+      run: ./gradlew jacocoTestCoverageVerification --no-daemon
+      continue-on-error: true
 
     - name: Generate test report
       if: always()
       run: ./gradlew testReport --no-daemon
       continue-on-error: true
 
-    - name: Upload test results
+    - name: Upload test results and coverage
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results
+        name: test-results-and-coverage
         path: |
           **/build/test-results/**/*.xml
-          **/build/reports/**
+          **/build/reports/tests/**
+          **/build/reports/jacoco/**
         retention-days: 7
 
     - name: Publish test results
@@ -78,7 +83,18 @@ jobs:
         files: |
           **/build/test-results/**/*.xml
         check_name: Test Results
-        comment_mode: off
+        comment_mode: always
+
+    - name: Add coverage to PR
+      if: github.event_name == 'pull_request'
+      uses: madrapps/jacoco-report@v1.6.1
+      with:
+        paths: |
+          **/build/reports/jacoco/test/jacocoTestReport.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 60
+        min-coverage-changed-files: 70
+        title: Code Coverage Report
 
   lint:
     name: Lint Check
