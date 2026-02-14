@@ -2,7 +2,7 @@ package koreatech.kapp.user.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import koreatech.kapp.auth.AuthenticatedUser
-import koreatech.kapp.domain.user.model.UserId
+import koreatech.kapp.domain.user.model.User
 import koreatech.kapp.user.controller.dto.LoginRequest
 import koreatech.kapp.user.controller.dto.LoginResponse
 import koreatech.kapp.user.controller.dto.RegisterRequest
@@ -41,9 +41,8 @@ class AuthController(
     @Operation(description = "로그인중인 회원 조회")
     @GetMapping("/me")
     fun getCurrentUser(
-        @AuthenticatedUser userId: UserId
+        @AuthenticatedUser user: User
     ): ResponseEntity<UserResponse> {
-        val user = userApplicationService.getCurrentUser(userId)
         return ResponseEntity.ok(user.toUserResponse())
     }
 }
