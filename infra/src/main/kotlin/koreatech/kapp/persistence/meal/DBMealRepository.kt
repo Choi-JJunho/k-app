@@ -43,7 +43,7 @@ class DBMealRepository(
         return MealRecord(
             id = record[MealTable.ID],
             date = record[MealTable.DATE],
-            diningTime = DiningTime.valueOf(record[MealTable.DINING_TIME]),
+            diningTime = DiningTime.from(record[MealTable.DINING_TIME]),
             place = record[MealTable.PLACE],
             price = record[MealTable.PRICE],
             kcal = record[MealTable.KCAL],

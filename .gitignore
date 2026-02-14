@@ -40,3 +40,4 @@ out/
 .kotlin
 
 application*.yml
+deploy.homeamd.env

@@ -28,6 +28,9 @@ class DBMealRepositoryTest {
         dsl = DSL.using(connection, SQLDialect.H2)
         repository = DBMealRepository(dsl)
 
+        dsl.execute("""drop table if exists "meal_menu_items"""")
+        dsl.execute("""drop table if exists "meals"""")
+
         dsl.execute(
             """
             create table "meals" (
@@ -91,5 +94,33 @@ class DBMealRepositoryTest {
         assertEquals("학생식당", meals.first().place)
         assertEquals(2, meals.first().menu.items.size)
         assertTrue(meals.first().menu.items.contains("김치찌개"))
+    }
+
+    @Test
+    fun `소문자 dining_time 값도 조회할 수 있다`() {
+        val targetDate = LocalDate.of(2026, 2, 15)
+        val now = LocalDateTime.now()
+
+        val mealId = dsl.insertInto(MealTable)
+            .set(MealTable.DATE, targetDate)
+            .set(MealTable.DINING_TIME, "breakfast")
+            .set(MealTable.PLACE, "복지관")
+            .set(MealTable.PRICE, "4500")
+            .set(MealTable.KCAL, "600")
+            .set(MealTable.CREATED_AT, now)
+            .set(MealTable.UPDATED_AT, now)
+            .returningResult(MealTable.ID)
+            .fetchOne()
+            ?.value1()
+
+        dsl.insertInto(MealMenuItemTable)
+            .set(MealMenuItemTable.MEAL_ID, mealId)
+            .set(MealMenuItemTable.MENU_ITEM, "계란찜")
+            .execute()
+
+        val meals = repository.findByDate(targetDate)
+
+        assertEquals(1, meals.size)
+        assertEquals(DiningTime.BREAKFAST, meals.first().diningTime)
     }
 }
