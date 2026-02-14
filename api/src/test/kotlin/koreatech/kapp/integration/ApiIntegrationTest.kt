@@ -190,6 +190,30 @@ class ApiIntegrationTest @Autowired constructor(
         assertEquals(1, count("select count(*) from users where email = ?", email))
     }
 
+    @Test
+    fun `should return bad request when register payload misses required field`() {
+        val suffix = System.currentTimeMillis()
+        val email = "integration-missing-$suffix@example.com"
+        val password = "Pw!${suffix}x"
+
+        val registerBody = """
+            {
+              "email": "$email",
+              "password": "$password",
+              "name": "Integration$suffix"
+            }
+        """.trimIndent()
+
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerBody)
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+            .andExpect(jsonPath("$.message", Matchers.containsString("studentEmployeeId")))
+    }
+
     private fun insertMeal(
         connection: java.sql.Connection,
         id: Long,

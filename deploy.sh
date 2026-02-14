@@ -32,6 +32,7 @@ HEALTH_PATH="${HEALTH_PATH:-/actuator/health}"
 HEALTH_WAIT_SECONDS="${HEALTH_WAIT_SECONDS:-90}"
 
 LOCAL_ENV_FILE="${LOCAL_ENV_FILE:-${ROOT_DIR}/deploy.homeamd.env}"
+SKIP_TESTS=0
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -40,6 +41,39 @@ log() {
 fail() {
   printf '[deploy] ERROR: %s\n' "$*" >&2
   exit 1
+}
+
+usage() {
+  cat <<'USAGE'
+Usage: ./deploy.sh [-x test]
+
+Options:
+  -x test    Skip tests during image build.
+  -h, --help Show this help message.
+USAGE
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -x)
+        [[ $# -ge 2 ]] || fail "missing value for -x (supported: test)"
+        if [[ "$2" == "test" ]]; then
+          SKIP_TESTS=1
+          shift 2
+        else
+          fail "unsupported -x value: $2 (supported: test)"
+        fi
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        fail "unknown argument: $1"
+        ;;
+    esac
+  done
 }
 
 need_local_cmd() {
@@ -52,6 +86,8 @@ need_remote_cmd() {
 }
 
 main() {
+  parse_args "$@"
+
   need_local_cmd ssh
   need_local_cmd tar
 
@@ -64,6 +100,7 @@ main() {
   log "supabase_env_file=${SUPABASE_ENV_FILE}"
   log "supabase_pooler_container=${SUPABASE_POOLER_CONTAINER}"
   log "kmeal_container_name=${KMEAL_CONTAINER_NAME}"
+  log "skip_tests=${SKIP_TESTS}"
 
   ssh "$TARGET_HOST" "mkdir -p '${REMOTE_BASE_DIR}'"
 
@@ -92,7 +129,7 @@ main() {
 
   log "building image and restarting container on remote host"
   ssh "$TARGET_HOST" \
-    "APP_NAME='${APP_NAME}' CONTAINER_NAME='${CONTAINER_NAME}' IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' HOST_PORT='${HOST_PORT}' CONTAINER_PORT='${CONTAINER_PORT}' SPRING_PROFILE='${SPRING_PROFILE}' REMOTE_SRC_DIR='${REMOTE_SRC_DIR}' REMOTE_ENV_FILE='${REMOTE_ENV_FILE}' SUPABASE_ENV_FILE='${SUPABASE_ENV_FILE}' DOCKER_NETWORK='${DOCKER_NETWORK}' SUPABASE_POOLER_CONTAINER='${SUPABASE_POOLER_CONTAINER}' KMEAL_CONTAINER_NAME='${KMEAL_CONTAINER_NAME}' DB_HOST_OVERRIDE='${DB_HOST_OVERRIDE}' DB_PORT_OVERRIDE='${DB_PORT_OVERRIDE}' DB_NAME_OVERRIDE='${DB_NAME_OVERRIDE}' DB_USERNAME_OVERRIDE='${DB_USERNAME_OVERRIDE}' DB_PASSWORD_OVERRIDE='${DB_PASSWORD_OVERRIDE}' DB_SSLMODE_OVERRIDE='${DB_SSLMODE_OVERRIDE}' HEALTH_PATH='${HEALTH_PATH}' HEALTH_WAIT_SECONDS='${HEALTH_WAIT_SECONDS}' bash -s" <<'REMOTE_SCRIPT'
+    "APP_NAME='${APP_NAME}' CONTAINER_NAME='${CONTAINER_NAME}' IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' HOST_PORT='${HOST_PORT}' CONTAINER_PORT='${CONTAINER_PORT}' SPRING_PROFILE='${SPRING_PROFILE}' REMOTE_SRC_DIR='${REMOTE_SRC_DIR}' REMOTE_ENV_FILE='${REMOTE_ENV_FILE}' SUPABASE_ENV_FILE='${SUPABASE_ENV_FILE}' DOCKER_NETWORK='${DOCKER_NETWORK}' SUPABASE_POOLER_CONTAINER='${SUPABASE_POOLER_CONTAINER}' KMEAL_CONTAINER_NAME='${KMEAL_CONTAINER_NAME}' DB_HOST_OVERRIDE='${DB_HOST_OVERRIDE}' DB_PORT_OVERRIDE='${DB_PORT_OVERRIDE}' DB_NAME_OVERRIDE='${DB_NAME_OVERRIDE}' DB_USERNAME_OVERRIDE='${DB_USERNAME_OVERRIDE}' DB_PASSWORD_OVERRIDE='${DB_PASSWORD_OVERRIDE}' DB_SSLMODE_OVERRIDE='${DB_SSLMODE_OVERRIDE}' HEALTH_PATH='${HEALTH_PATH}' HEALTH_WAIT_SECONDS='${HEALTH_WAIT_SECONDS}' SKIP_TESTS='${SKIP_TESTS}' bash -s" <<'REMOTE_SCRIPT'
 set -Eeuo pipefail
 
 read_env_key() {
@@ -238,7 +275,12 @@ if [[ -n "$port_owner" && "$port_owner" != "$CONTAINER_NAME" ]]; then
 fi
 
 cd "$REMOTE_SRC_DIR"
-docker build --pull -t "${IMAGE_NAME}:${IMAGE_TAG}" -t "${IMAGE_NAME}:latest" .
+docker_build_args=(--pull)
+if [[ "${SKIP_TESTS:-0}" == "1" ]]; then
+  docker_build_args+=(--build-arg "GRADLE_BUILD_ARGS=-x test")
+fi
+
+docker build "${docker_build_args[@]}" -t "${IMAGE_NAME}:${IMAGE_TAG}" -t "${IMAGE_NAME}:latest" .
 
 if docker ps -a --format '{{.Names}}' | grep -Fxq "$CONTAINER_NAME"; then
   docker rm -f "$CONTAINER_NAME" >/dev/null
